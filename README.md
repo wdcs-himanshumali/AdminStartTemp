@@ -151,6 +151,15 @@ These tools will automatically:
 2. Validate your commit message format
 3. Prevent the commit if either check fails
 
+### Git Hooks (Husky)
+
+This project uses Husky for Git hooks to ensure code quality before commits. The following hooks are configured:
+
+- **pre-commit**: Runs lint-staged to check and fix code style issues in staged files
+- **commit-msg**: Validates commit messages against conventional commit format
+
+To modify Git hooks, edit the files in the `.husky` directory.
+
 ### Linting & Formatting
 
 To maintain code quality and consistency, use the following commands:
