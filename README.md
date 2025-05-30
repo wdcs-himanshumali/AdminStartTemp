@@ -4,6 +4,54 @@ Vuexy Admin Starter Admin Panel
 
 ## Development Setup
 
+### API Layer
+
+This project uses TanStack Query (React Query) and Axios for API management. The setup includes:
+
+#### Axios Configuration
+
+- Base URL configuration
+- Request/Response interceptors
+- Authentication token handling
+- Error handling
+- Refresh token logic (commented out, ready to implement)
+
+#### React Query Setup
+
+- Query client configuration
+- Default options for queries
+- React Query DevTools in development
+- Automatic cache invalidation
+- Optimistic updates support
+
+#### API Service Structure
+
+```typescript
+// Example usage of API hooks
+const { data: users, isLoading } = useUsers()
+const { data: user } = useUser(userId)
+const { mutate: createUser } = useCreateUser()
+const { mutate: updateUser } = useUpdateUser()
+const { mutate: deleteUser } = useDeleteUser()
+```
+
+#### Available API Hooks
+
+- `useUsers()`: Fetch all users
+- `useUser(id)`: Fetch single user
+- `useCreateUser()`: Create new user
+- `useUpdateUser()`: Update existing user
+- `useDeleteUser()`: Delete user
+
+#### Error Handling
+
+The API layer includes built-in error handling for:
+
+- Network errors
+- Authentication errors (401)
+- Token refresh logic
+- Request timeouts
+
 ### Git Commit Conventions
 
 This project follows [Conventional Commits](https://www.conventionalcommits.org/) specification. This means that all your commit messages must be formatted according to a specific structure:
@@ -102,3 +150,21 @@ These tools will automatically:
 1. Run ESLint and Prettier on staged files before each commit
 2. Validate your commit message format
 3. Prevent the commit if either check fails
+
+### Linting & Formatting
+
+To maintain code quality and consistency, use the following commands:
+
+- **Fix linting and formatting issues in all files:**
+
+  ```bash
+  npm run lint:fix
+  ```
+
+  This command runs ESLint and Prettier on your entire codebase and automatically fixes most issues.
+
+- **Fix linting and formatting issues in staged files (pre-commit):**
+  ```bash
+  npx lint-staged
+  ```
+  This command runs ESLint and Prettier only on files that are staged for commit, as part of the pre-commit hook.

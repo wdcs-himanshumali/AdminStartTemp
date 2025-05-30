@@ -5,7 +5,7 @@ import { useState } from 'react'
 
 // Next Imports
 import Link from 'next/link'
-import { useParams, useRouter, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 // MUI Imports
 import useMediaQuery from '@mui/material/useMediaQuery'
@@ -97,7 +97,6 @@ const Login = ({ mode }: { mode: SystemMode }) => {
   // Hooks
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { lang: locale } = useParams()
   const { settings } = useSettings()
   const theme = useTheme()
   const hidden = useMediaQuery(theme.breakpoints.down('md'))
