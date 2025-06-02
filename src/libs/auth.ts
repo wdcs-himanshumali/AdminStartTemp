@@ -1,7 +1,11 @@
 // Third-party Imports
 import CredentialProvider from 'next-auth/providers/credentials'
-import GoogleProvider from 'next-auth/providers/google'
+
+// import GoogleProvider from 'next-auth/providers/google'
 import type { NextAuthOptions } from 'next-auth'
+
+// import axiosInstance from './axios'
+import axios from 'axios'
 
 export const authOptions: NextAuthOptions = {
   // ** Configure one or more authentication providers
@@ -19,50 +23,81 @@ export const authOptions: NextAuthOptions = {
        */
       credentials: {},
       async authorize(credentials) {
-        /*
-         * You need to provide your own logic here that takes the credentials submitted and returns either
-         * an object representing a user or value that is false/null if the credentials are invalid.
-         * For e.g. return { id: 1, name: 'J Smith', email: 'jsmith@example.com' }
-         * You can also use the `req` object to obtain additional parameters (i.e., the request IP address)
-         */
         const { email, password } = credentials as { email: string; password: string }
 
         try {
-          // ** Login API Call to match the user credentials and receive user data in response along with his role
-          const res = await fetch(`${process.env.API_URL}/login`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ email, password })
+          console.log('Making login request to:', 'http://localhost:3000/api/auth/login')
+          console.log('Request payload:', {
+            email,
+            password,
+            device_info: {
+              fcm_token: 'string',
+              device_id: 'string',
+              device_name: 'string',
+              platform_type: 'Android',
+              api_version: '1.0',
+              os_version: '14.0',
+              latitude: 37.7749,
+              longitude: -122.4194,
+              app_version: '1.2.3'
+            }
           })
 
-          const data = await res.json()
+          const response = await axios.post(
+            'http://localhost:3000/api/auth/login',
+            {
+              email,
+              password,
+              device_info: {
+                fcm_token: 'string',
+                device_id: 'string',
+                device_name: 'string',
+                platform_type: 'Android',
+                api_version: '1.0',
+                os_version: '14.0',
+                latitude: 37.7749,
+                longitude: -122.4194,
+                app_version: '1.2.3'
+              }
+            },
+            {
+              headers: {
+                'Content-Type': 'application/json',
+                'app-type': 'web',
+                'Accept-Language': 'en'
+              }
+            }
+          )
 
-          if (res.status === 401) {
-            throw new Error(JSON.stringify(data))
-          }
+          console.log('Login response:', response.data)
 
-          if (res.status === 200) {
-            /*
-             * Please unset all the sensitive information of the user either from API response or before returning
-             * user data below. Below return statement will set the user object in the token and the same is set in
-             * the session which will be accessible all over the app.
-             */
-            return data
+          const data = response.data
+
+          if (data.statusCode === 200) {
+            // Return user data and access token exactly as per the API response
+            return {
+              id: data.user.id,
+              email: data.user.email,
+              name: data.user.name,
+              role_id: data.user.role_id,
+              access_token: data.access_token
+            }
           }
 
           return null
         } catch (e: any) {
-          throw new Error(e.message)
+          console.error('Login error:', e.response?.data || e.message)
+
+          // Throw the exact error message from the API
+          throw new Error(e.response?.data?.message || 'Authentication failed')
         }
       }
-    }),
-
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID as string,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string
     })
+
+    // GoogleProvider({
+    //   clientId: process.env.GOOGLE_CLIENT_ID as string,
+    //   clientSecret: process.env.GOOGLE_CLIENT_SECRET as string
+    // })
 
     // ** ...add more providers here
   ],
@@ -103,7 +138,11 @@ export const authOptions: NextAuthOptions = {
          * For adding custom parameters to user in session, we first need to add those parameters
          * in token which then will be available in the `session()` callback
          */
+        token.id = Number(user.id)
+        token.email = user.email
         token.name = user.name
+        token.role_id = Number(user.role_id)
+        token.access_token = user.access_token
       }
 
       return token
@@ -111,7 +150,11 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (session.user) {
         // ** Add custom params to user in session which are added in `jwt()` callback via `token` parameter
+        session.user.id = token.id
+        session.user.email = token.email
         session.user.name = token.name
+        session.user.role_id = token.role_id
+        session.access_token = token.access_token
       }
 
       return session
