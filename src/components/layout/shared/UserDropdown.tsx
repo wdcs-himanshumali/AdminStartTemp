@@ -77,6 +77,7 @@ const UserDropdown = () => {
       // toastService.error((err as Error).message)
     }
   }
+
   return (
     <>
       <Badge
