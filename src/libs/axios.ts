@@ -1,12 +1,16 @@
 import axios from 'axios'
 import type { AxiosError, AxiosInstance, InternalAxiosRequestConfig, AxiosResponse } from 'axios'
 
+console.log('Creating axios instance with baseURL:', 'http://localhost:3000/api')
+
 // Create axios instance with default config
 const axiosInstance: AxiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  baseURL: 'http://localhost:3000/api',
   timeout: 10000,
   headers: {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    'app-type': 'web',
+    'Accept-Language': 'en'
   }
 })
 
@@ -18,6 +22,13 @@ interface CustomInternalAxiosRequestConfig extends InternalAxiosRequestConfig {
 // Request interceptor
 axiosInstance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
+    console.log('Axios Request:', {
+      url: config.url,
+      method: config.method,
+      headers: config.headers,
+      data: config.data
+    })
+
     // You can add auth token here
     const token = localStorage.getItem('accessToken')
 
@@ -28,6 +39,8 @@ axiosInstance.interceptors.request.use(
     return config
   },
   (error: AxiosError) => {
+    console.error('Axios Request Error:', error)
+
     return Promise.reject(error)
   }
 )
@@ -35,9 +48,19 @@ axiosInstance.interceptors.request.use(
 // Response interceptor
 axiosInstance.interceptors.response.use(
   (response: AxiosResponse) => {
+    console.log('Axios Response:', {
+      status: response.status,
+      data: response.data
+    })
+
     return response
   },
   async (error: AxiosError) => {
+    console.error('Axios Response Error:', {
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message
+    })
     const originalRequest = error.config as CustomInternalAxiosRequestConfig
 
     // Handle 401 Unauthorized errors

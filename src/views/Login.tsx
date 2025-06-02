@@ -109,8 +109,8 @@ const Login = ({ mode }: { mode: SystemMode }) => {
   } = useForm<FormData>({
     resolver: valibotResolver(schema),
     defaultValues: {
-      email: 'admin@vuexy.com',
-      password: 'admin'
+      email: 'himanshu.mali@webcluesinfotech.com',
+      password: 'password123'
     }
   })
 
@@ -125,22 +125,33 @@ const Login = ({ mode }: { mode: SystemMode }) => {
   const handleClickShowPassword = () => setIsPasswordShown(show => !show)
 
   const onSubmit: SubmitHandler<FormData> = async (data: FormData) => {
+    console.log('Login attempt with:', data)
+
     const res = await signIn('credentials', {
       email: data.email,
       password: data.password,
       redirect: false
     })
 
+    console.log('SignIn response:', res)
+
     if (res && res.ok && res.error === null) {
       // Vars
       const redirectURL = searchParams.get('redirectTo') ?? '/'
 
+      console.log('Redirecting to:', redirectURL)
       router.replace(redirectURL)
     } else {
       if (res?.error) {
-        const error = JSON.parse(res.error)
+        console.error('Login error:', res.error)
 
-        setErrorState(error)
+        try {
+          const error = JSON.parse(res.error)
+
+          setErrorState(error)
+        } catch {
+          setErrorState({ message: [res.error] })
+        }
       }
     }
   }
@@ -169,8 +180,8 @@ const Login = ({ mode }: { mode: SystemMode }) => {
           </div>
           <Alert icon={false} className='bg-[var(--mui-palette-primary-lightOpacity)]'>
             <Typography variant='body2' color='primary.main'>
-              Email: <span className='font-medium'>admin@vuexy.com</span> / Pass:{' '}
-              <span className='font-medium'>admin</span>
+              Email: <span className='font-medium'>himanshu.mali@webcluesinfotech.com</span> / Pass:{' '}
+              <span className='font-medium'>password123</span>
             </Typography>
           </Alert>
           <form
