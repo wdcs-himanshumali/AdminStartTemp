@@ -52,7 +52,7 @@ The API layer includes built-in error handling for:
 - Token refresh logic
 - Request timeouts
 
-### Git Commit Conventions
+### Git Commit Conventionss
 
 This project follows [Conventional Commits](https://www.conventionalcommits.org/) specification. This means that all your commit messages must be formatted according to a specific structure:
 
