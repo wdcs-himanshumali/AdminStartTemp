@@ -52,7 +52,7 @@ The API layer includes built-in error handling for:
 - Token refresh logic
 - Request timeouts
 
-### Git Commit Conventionss
+### Git Commit Conventions
 
 This project follows [Conventional Commits](https://www.conventionalcommits.org/) specification. This means that all your commit messages must be formatted according to a specific structure:
 
@@ -141,7 +141,7 @@ git commit -m "revert(auth): revert to previous authentication method"
 
 This project uses several development tools to maintain code quality:
 
-- **Husky**: Git hooks for running scripts before commitss
+- **Husky**: Git hooks for running scripts before commits
 - **lint-staged**: Runs linters on staged files
 - **commitlint**: Enforces conventional commit messages
 
