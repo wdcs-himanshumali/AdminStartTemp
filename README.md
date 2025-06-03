@@ -141,7 +141,7 @@ git commit -m "revert(auth): revert to previous authentication method"
 
 This project uses several development tools to maintain code quality:
 
-- **Husky**: Git hooks for running scripts before commits
+- **Husky**: Git hooks for running scripts before commitss
 - **lint-staged**: Runs linters on staged files
 - **commitlint**: Enforces conventional commit messages
 
