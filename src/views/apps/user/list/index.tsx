@@ -57,7 +57,21 @@ const UserList = () => {
           onPageChange={page => setQueryParams(prev => ({ ...prev, page }))}
           onLimitChange={limit => setQueryParams(prev => ({ ...prev, limit, page: 1 }))}
           onSearch={search => setQueryParams(prev => ({ ...prev, search, page: 1 }))}
-          onFilterChange={filters => setQueryParams(prev => ({ ...prev, ...filters, page: 1 }))}
+          onFilterChange={filters => {
+            setQueryParams(prev => {
+              const newParams = { ...prev, page: 1 }
+
+              // Only update filters that are provided
+              if (filters.role_id !== undefined) newParams.role_id = filters.role_id
+              if (filters.status !== undefined) newParams.status = filters.status
+
+              return newParams
+            })
+          }}
+          filters={{
+            role_id: queryParams.role_id,
+            status: queryParams.status
+          }}
         />
       </Grid>
     </Grid>

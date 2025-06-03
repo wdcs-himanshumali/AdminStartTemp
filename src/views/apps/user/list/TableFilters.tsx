@@ -1,5 +1,5 @@
 // React Imports
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 // MUI Imports
 import CardContent from '@mui/material/CardContent'
@@ -20,24 +20,40 @@ interface TableFiltersProps {
   setData: (data: User[]) => void
   tableData?: User[]
   onFilterChange: (filters: Partial<UsersQueryParams>) => void
+  currentFilters?: {
+    role_id?: number
+    status?: string
+  }
 }
 
-const TableFilters = ({ onFilterChange }: TableFiltersProps) => {
+const TableFilters = ({ onFilterChange, currentFilters }: TableFiltersProps) => {
   // States
-  const [role, setRole] = useState<string>('')
-  const [status, setStatus] = useState<string>('')
+  const [role, setRole] = useState<string>(currentFilters?.role_id?.toString() || '')
+  const [status, setStatus] = useState<string>(currentFilters?.status || '')
+
+  // Update local state when currentFilters change
+  useEffect(() => {
+    setRole(currentFilters?.role_id?.toString() || '')
+    setStatus(currentFilters?.status || '')
+  }, [currentFilters])
 
   // API Hooks
   const { data: rolesData, isLoading: isLoadingRoles } = useRoles()
 
   const handleRoleChange = (value: string) => {
     setRole(value)
-    onFilterChange({ role_id: value ? Number(value) : undefined })
+    onFilterChange({
+      role_id: value ? Number(value) : undefined,
+      status: status || undefined
+    })
   }
 
   const handleStatusChange = (value: string) => {
     setStatus(value)
-    onFilterChange({ status: value || undefined })
+    onFilterChange({
+      role_id: role ? Number(role) : undefined,
+      status: value || undefined
+    })
   }
 
   return (

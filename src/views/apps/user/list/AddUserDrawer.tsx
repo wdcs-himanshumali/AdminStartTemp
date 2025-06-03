@@ -84,6 +84,7 @@ const AddUserDrawer = (props: Props) => {
       company: formData.company,
       country: formData.country,
       contact: formData.contact,
+      phone_number: formData.contact,
       billing: userData?.[Math.floor(Math.random() * 50) + 1].billing ?? 'Auto Debit'
     }
 

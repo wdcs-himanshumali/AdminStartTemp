@@ -36,7 +36,6 @@ import {
   getFacetedRowModel,
   getFacetedUniqueValues,
   getFacetedMinMaxValues,
-  getPaginationRowModel,
   getSortedRowModel
 } from '@tanstack/react-table'
 import type { ColumnDef, FilterFn } from '@tanstack/react-table'
@@ -107,12 +106,20 @@ const DebouncedInput = ({
 } & Omit<TextFieldProps, 'onChange'>) => {
   // States
   const [value, setValue] = useState(initialValue)
+  const [isInitialMount, setIsInitialMount] = useState(true)
 
   useEffect(() => {
     setValue(initialValue)
   }, [initialValue])
 
   useEffect(() => {
+    // Skip the initial mount effect
+    if (isInitialMount) {
+      setIsInitialMount(false)
+
+      return
+    }
+
     const timeout = setTimeout(() => {
       onChange(value)
     }, debounce)
@@ -152,6 +159,10 @@ interface UserListTableProps {
   onLimitChange: (limit: number) => void
   onSearch: (search: string) => void
   onFilterChange: (filters: Partial<UsersQueryParams>) => void
+  filters?: {
+    role_id?: number
+    status?: string
+  }
 }
 
 const UserListTable = ({
@@ -162,7 +173,8 @@ const UserListTable = ({
   onPageChange,
   onLimitChange,
   onSearch,
-  onFilterChange
+  onFilterChange,
+  filters
 }: UserListTableProps) => {
   // States
   const [rowSelection, setRowSelection] = useState({})
@@ -192,7 +204,14 @@ const UserListTable = ({
   const handleSearch = useCallback(
     (value: string) => {
       setGlobalFilter(value)
-      onSearch(value)
+
+      // Only trigger search API call if there is actual search text
+      if (value.trim()) {
+        onSearch(value)
+      } else {
+        // If search is empty, reset to initial state without search parameter
+        onSearch('')
+      }
     },
     [onSearch]
   )
@@ -354,11 +373,6 @@ const UserListTable = ({
       rowSelection,
       globalFilter
     },
-    initialState: {
-      pagination: {
-        pageSize: 10
-      }
-    },
     enableRowSelection: true,
     globalFilterFn: fuzzyFilter,
     onRowSelectionChange: setRowSelection,
@@ -366,7 +380,6 @@ const UserListTable = ({
     onGlobalFilterChange: setGlobalFilter,
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
     getFacetedMinMaxValues: getFacetedMinMaxValues()
@@ -382,7 +395,12 @@ const UserListTable = ({
     <>
       <Card>
         <CardHeader title='Filters' className='pbe-4' />
-        <TableFilters setData={setFilteredData} tableData={data} onFilterChange={onFilterChange} />
+        <TableFilters
+          setData={setFilteredData}
+          tableData={data}
+          onFilterChange={onFilterChange}
+          currentFilters={filters}
+        />
         <div className='flex justify-between flex-col items-start md:flex-row md:items-center p-6 border-bs gap-4'>
           <CustomTextField
             select
@@ -458,29 +476,37 @@ const UserListTable = ({
               </tbody>
             ) : (
               <tbody>
-                {table
-                  .getRowModel()
-                  .rows.slice(0, table.getState().pagination.pageSize)
-                  .map(row => {
-                    return (
-                      <tr key={row.id} className={classnames({ selected: row.getIsSelected() })}>
-                        {row.getVisibleCells().map(cell => (
-                          <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
-                        ))}
-                      </tr>
-                    )
-                  })}
+                {table.getRowModel().rows.map(row => {
+                  return (
+                    <tr key={row.id} className={classnames({ selected: row.getIsSelected() })}>
+                      {row.getVisibleCells().map(cell => (
+                        <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
+                      ))}
+                    </tr>
+                  )
+                })}
               </tbody>
             )}
           </table>
         </div>
         <TablePagination
-          component={() => <TablePaginationComponent table={table} />}
+          component={() => (
+            <TablePaginationComponent
+              table={table}
+              total={total}
+              page={page}
+              limit={limit}
+              onPageChange={newPage => onPageChange(newPage)}
+            />
+          )}
           count={total}
           rowsPerPage={limit}
           page={page - 1}
           onPageChange={(_, newPage) => onPageChange(newPage + 1)}
           onRowsPerPageChange={e => onLimitChange(Number(e.target.value))}
+          rowsPerPageOptions={[10, 25, 50]}
+          showFirstButton
+          showLastButton
         />
       </Card>
       <Dialog open={deleteDialogOpen} onClose={handleDeleteCancel}>
